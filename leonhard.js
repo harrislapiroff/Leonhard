@@ -1,10 +1,18 @@
 (function () {
-	var leonhard = window.leonhard = {},
+	// Namespacing
+	var leonhard = window.leonhard
+		// Shortcut for this closure
 		L = leonhard;
 	
+	// Some shortcuts:
+	window.$V = function (arg) { new L.models.Vertex(arg) };
+	window.$E = function (arg1, arg2) { new L.models.Edge(arg1, arg2) };
+	
+	// setup some containers
 	L.models = {};
 	L.views = {};
 	
+	// The Vertex Model!
 	L.models.vertices = [];
 	L.models.Vertex = function (opts)
 		{
@@ -63,6 +71,7 @@
 			return out;
 		};
 	
+	// The Edge Model!
 	L.models.edges = [];
 	L.models.Edge = function (node1, node2)
 		{
@@ -87,6 +96,8 @@
 			this.n2 = arr[1];
 		};
 	
+	// A quick and rough view, just as a sample. I think views should take a set of vertices and edges?
+	// Maybe I need a graph object...
 	L.views.Bullets = function (vertices, edges) {
 		var i, el;
 		el = document.createElement('div');

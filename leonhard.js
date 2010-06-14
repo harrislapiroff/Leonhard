@@ -1,7 +1,6 @@
 (function () {
 	// Namespacing
-	var leonhard = window.leonhard
-		// Shortcut for this closure
+	var leonhard = window.leonhard = {},
 		L = leonhard;
 	
 	// Some shortcuts:
@@ -35,17 +34,20 @@
 		};
 	L.models.Vertex.prototype.getEdges = function ()
 		{
-			var vertices, i, out = [];
+			var vertices,
+				i,
+				out = [];
+				
 			// iterate over ALL the edges (is this the most efficient way?)
-			for (i = 0; i < L.models.edges.length; i++){
+			for (i = 0; i < L.models.edges.length; i++) {
 				// get the vertices
 				vertices = L.models.edges[i].getVertexs();
 				// does the first node match?
-				if(vertices[0]==this){
+				if (vertices[0]==this) {
 					out.push(L.models.edges[i]);
 				}
 				// does the second node match?
-				if(vertices[1]==this){
+				if (vertices[1]==this) {
 					out.push(L.models.edges[i]);
 				}
 			}
@@ -58,19 +60,34 @@
 			// get the edges
 			edges = this.getEdges();
 			// iterate over all connected edges
-			for(i = 0; i < edges.length; i++){
+			for (i = 0; i < edges.length; i++) {
 				// if this is node one, return node two
-				if(edges[i].n1==this){
+				if (edges[i].n1==this) {
 					out.push(edges[i].n2);
 				// if this is node two, return node one
-				}else{
+				} else {
 					out.push(edges[i].n1);
 				}
 			}
 			// push the whole array out
 			return out;
 		};
-	
+	L.models.Vertex.prototype.adjacent = function (vertex)
+		{
+			// get a list of vertices adjacent to this
+			var adjacentVertices = this.getAdjacent(),
+				i;
+			// iterate through each of those adjacent vertices
+			for (i=0; i < adjacentVertices.length; i++) {
+				// if they are the same as the vertex provided as argument, return true
+				if(adjacentVertices[i] == vertex){
+					return true;
+				}
+			}
+			// if we iterate through all of them and never get a true, return false.
+			return false;
+		}
+		
 	// The Edge Model!
 	L.models.edges = [];
 	L.models.Edge = function (node1, node2)
@@ -80,34 +97,51 @@
 		};
 	L.models.Edge.prototype.init = function (node1, node2)
 		{
-			this.setVertexs(node1, node2)
+			this.setVertices(node1, node2)
 			return this;
 		};
-	L.models.Edge.prototype.getVertexs = function ()
+	L.models.Edge.prototype.getVertices = function ()
 		{
 			return [this.n1, this.n2];
 		};
-	L.models.Edge.prototype.setVertexs = function (node1, node2)
+	L.models.Edge.prototype.setVertices = function (node1, node2)
 		{
 			if(typeof node1 != 'array'){
 				arr = [node1, node2];
 			}
 			this.n1 = arr[0];
 			this.n2 = arr[1];
+			return this;
 		};
 	
 	// A quick and rough view, just as a sample. I think views should take a set of vertices and edges?
 	// Maybe I need a graph object...
-	L.views.Bullets = function (vertices, edges) {
-		var i, el;
-		el = document.createElement('div');
-		for (i = 0; i < vertices.length; i++){
-			el.innerHTML = el.innerHTML + '<div class="node" id="'+vertices[i].name+'">&bull;</div>';
+	L.views.Bullets = function (vertices, edges)
+		{
+			var i,
+				el;
+			
+			el = document.createElement('div');
+		
+			for (i = 0; i < vertices.length; i++){
+				el.innerHTML = el.innerHTML + '<div class="node" id="'+vertices[i].name+'">&bull;</div>';
+			}
+			for (i = 0; i < edges.length; i++){
+				el.innerHTML = el.innerHTML + '<div class="edge" id="'+edges[i].n1.name+'_'+edges[i].n2.name+'">|</div>';
+			}
+		
+			document.body.appendChild(el);
+			return el;
 		}
-		for (i = 0; i < edges.length; i++){
-			el.innerHTML = el.innerHTML + '<div class="edge" id="'+edges[i].n1.name+'_'+edges[i].n2.name+'">|</div>';
+	
+	// A view using a force based algorithm and a canvas
+	L.views.FBA = function (vertices, edges)
+		{
+			var i,
+				locations = [];
+			for (i = 0; i < vertices.length; i++) {
+				locations.push([Math.random(), Math.random()])
+			}
+			console.log(locations);
 		}
-		document.body.appendChild(el);
-		return el;
-	}
 }());

@@ -6,14 +6,14 @@
 		<script type="text/javascript">
 			var i;
 			for (i = 0; i < 10; i++) {
-				new leonhard.models.Vertex({name: 'node'+i});
+				new $V({name: 'node'+i});
 			}
 			for (key in leonhard.models.vertices){
 				leonhard.models.vertices[key].connect(leonhard.models.vertices[((Math.floor(key)+1)%10)])
 			}
 			
 			window.addEventListener('load',function () {
-				leonhard.views.Bullets(leonhard.models.vertices, leonhard.models.edges)
+				leonhard.views.FBA(leonhard.models.vertices, leonhard.models.edges);
 			}, false)
 		</script>
 	</head>

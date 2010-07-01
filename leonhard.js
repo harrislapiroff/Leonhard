@@ -7,7 +7,7 @@
 	window.$Vertex = function (arg) { new L.models.Vertex(arg) };
 	window.$Node = $Vertex;
 	window.$Edge = function (arg1, arg2) { new L.models.Edge(arg1, arg2) };
-	window._
+	window._;
 	
 	// setup some containers
 	L.models = {};
@@ -166,6 +166,35 @@
 		
 			document.body.appendChild(el);
 			return el;
+		}
+		
+	L.views.SVG = function (vertices, edges)
+		{
+			var i,
+				v = [],
+				e = [],
+				c = Raphael(0,0,600,600);
+				
+			for ( key in vertices ) {
+				i = v.push(vertices[key]);
+				vertices[key].view =
+					{
+						'cx':Math.random()*600,
+						'cy':Math.random()*600,
+						'el': c.circle().attr({'fill':'#F00','stroke':'none'})
+					}
+				vertices[key].view.el.attr({'cx': vertices[key].view.cx, 'cy': vertices[key].view.cy, 'r':'3'})
+			}
+			for ( key in edges ) {
+				var verts = edges[key].getVertices(),
+					start = [verts[0].view.cx, verts[0].view.cy],
+					end = [verts[1].view.cx, verts[1].view.cy];
+				edges[key].view =
+					{
+						'el': c.path('M'+start[0]+' '+start[1]+'L'+end[0]+' '+end[1])
+					}
+			}
+			
 		}
 	
 }());

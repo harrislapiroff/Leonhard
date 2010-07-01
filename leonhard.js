@@ -4,8 +4,10 @@
 		L = leonhard;
 	
 	// Some shortcuts:
-	window.$V = function (arg) { new L.models.Vertex(arg) };
-	window.$E = function (arg1, arg2) { new L.models.Edge(arg1, arg2) };
+	window.$Vertex = function (arg) { new L.models.Vertex(arg) };
+	window.$Node = $Vertex;
+	window.$Edge = function (arg1, arg2) { new L.models.Edge(arg1, arg2) };
+	window._
 	
 	// setup some containers
 	L.models = {};
@@ -13,6 +15,11 @@
 	
 	// The Vertex Model!
 	L.models.vertices = [];
+	
+	// we'll use the alias node where we can
+	L.models.nodes = L.models.vertices;
+	L.models.Node = L.models.Vertex;
+	
 	L.models.Vertex = function (opts)
 		{
 			// run the init function
@@ -41,7 +48,7 @@
 			// iterate over ALL the edges (is this the most efficient way?)
 			for (i = 0; i < L.models.edges.length; i++) {
 				// get the vertices
-				vertices = L.models.edges[i].getVertexs();
+				vertices = L.models.edges[i].getVertices();
 				// does the first node match?
 				if (vertices[0]==this) {
 					out.push(L.models.edges[i]);
@@ -109,6 +116,14 @@
 			if(typeof node1 != 'array'){
 				arr = [node1, node2];
 			}
+			// if trying to draw an edge between a node and itself throw exception
+			if(node1 == node2){
+				throw('A vertex cannot be connected to itself');
+			}
+			// if they are already adjacent, do nothing
+			if(node1.adjacent(node2)){
+				return this;
+			}
 			this.n1 = arr[0];
 			this.n2 = arr[1];
 			return this;
@@ -135,13 +150,141 @@
 		}
 	
 	// A view using a force based algorithm and a canvas
-	L.views.FBA = function (vertices, edges)
+	// http://en.wikipedia.org/wiki/Force-based_algorithms_(graph_drawing)
+/*	L.views.FBA = function (vertices, edges)
 		{
-			var i,
-				locations = [];
+			var i,j,
+				locations = [],
+				velocities = [],
+				energy=1,
+				force = [],
+				direction = [],
+				// a quick R2 vector class
+				V = function(a1,a2){
+					if(this instanceof arguments.callee){
+						this.a1 = a1;
+						this.a2 = a2;
+						this.d = function (v) {
+							return Math.sqrt(((this.a1 - v.a1)*(this.a1 - v.a1))+((this.a2 - v.a2)*(this.a2 - v.a2)));
+						}
+						this.plus = function (v) {
+							return V(this.a1+v.a1,this.a2+v.a2);
+						}
+						this.minus = function (v) {
+							return V(this.a1-v.a1,this.a2-v.a2);
+						}
+						this.length = function (v) {
+							return Math.sqrt((this.a1*this.a1)+(this.a2*this.a2));
+						}
+						this.normal = function () {
+							return V(this.a1/this.length(),this.a2/this.length())
+						}
+						this.reverse = function () {
+							return V(0,0).minus(this);
+						}
+					}else{
+						return new V(a1,a2)
+					}
+				};
+				
+			// for each vertex
+			// set its position to two random numbers
+			// set its velocity to 0,0
 			for (i = 0; i < vertices.length; i++) {
-				locations.push([Math.random(), Math.random()])
+				velocities.push(V(0,0));
+				force.push(V(0,0));
+				direction.push([]);
+				locations.push(V(Math.random(), Math.random()));
 			}
-			console.log(locations);
+			
+			// loop
+			while (energy > .001) {
+				for (i = 0; i < vertices.length; i++) {
+					force[i] = V(0,0);
+					// for every other vector j not the same as i
+					for (j = 0; j < vertices.length; j++){ if(j!=i){
+						direction[i][j] = locations[i].minus(locations[j]).normal();
+						force[i]=force[i].plus(V(
+							(1-locations[i].d(locations[j]))*.001*direction[i][j].a1,
+							(1-locations[i].d(locations[j]))*.001*direction[i][j].a2
+						))
+					}}					
+				}
+				energy=0;
+			}
+		}
+*/
+		L.views.FBA = function (vertices, edges) {
+			var vreps=[],
+				ereps=[],
+				i, j, direction, loopcount = 0,
+				energy = 1,
+				// a quick R2 vector class
+				V = function(a1,a2){
+					if(this instanceof arguments.callee){
+						this.a1 = a1;
+						this.a2 = a2;
+						this.d = function (v) {
+							return Math.sqrt(((this.a1 - v.a1)*(this.a1 - v.a1))+((this.a2 - v.a2)*(this.a2 - v.a2)));
+						}
+						this.plus = function (v) {
+							return V(this.a1+v.a1,this.a2+v.a2);
+						}
+						this.minus = function (v) {
+							return V(this.a1-v.a1,this.a2-v.a2);
+						}
+						this.length = function (v) {
+							return Math.sqrt((this.a1*this.a1)+(this.a2*this.a2));
+						}
+						this.normal = function () {
+							return V(this.a1/this.length(),this.a2/this.length())
+						}
+						this.reverse = function () {
+							return V(0,0).minus(this);
+						}
+					}else{
+						return new V(a1,a2)
+					}
+				};;
+				
+			for (i = 0; i<vertices.length; i++) {
+				vreps.push({
+					vertex: vertices[i],
+					location: V(Math.random()/2,Math.random()/2),
+					velocity: V(0,0),
+					el: document.createElement('div')
+				});
+				vreps[i].el.innerHTML='&bull; '+vreps[i].vertex.name;
+				document.body.appendChild(vreps[i].el);
+			}
+			
+			while (energy > .5) {
+				loopcount++;
+				// position all of the elements
+				for (i = 0; i < vreps.length; i++) {
+					vreps[i].velocity = V(0,0)
+					for (j = 0; j < vreps.length; j++) {
+						if(i!=j){
+							direction = vreps[i].location.minus(vreps[j].location).normal();
+							vreps[i].velocity = vreps[i].velocity.plus(V(
+								(Math.abs(1-vreps[i].location.d(vreps[j].location)))*(.1/loopcount)*direction.a1,
+								(Math.abs(1-vreps[i].location.d(vreps[j].location)))*(.1/loopcount)*direction.a2
+							));
+						}
+					}
+					for (j = 0; j < vreps.length; j++) {
+						if( vreps[i].vertex.adjacent(vreps[j].vertex) ){
+							direction = vreps[i].location.minus(vreps[j].location).normal();
+							vreps[i].velocity = vreps[i].velocity.minus(V(
+								(Math.abs(1-vreps[i].location.d(vreps[j].location)))*(.1/loopcount)*direction.a1,
+								(Math.abs(1-vreps[i].location.d(vreps[j].location)))*(.1/loopcount)*direction.a2
+							));
+						}
+					}
+					vreps[i].location = vreps[i].location.plus(vreps[i].velocity);
+					vreps[i].el.setAttribute('style','position:absolute;font-size:10px;top:'+vreps[i].location.a1*window.innerHeight+'px;left:'+vreps[i].location.a2*window.innerWidth+'px;')
+				}
+				energy = energy - .00001;
+			}
 		}
 }());

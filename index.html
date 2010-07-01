@@ -6,7 +6,7 @@
 		<script type="text/javascript">
 			var i;
 			for (i = 0; i < 10; i++) {
-				new $V({name: 'node'+i});
+				new $Vertex({name: 'node'+i});
 			}
 			for (key in leonhard.models.vertices){
 				leonhard.models.vertices[key].connect(leonhard.models.vertices[((Math.floor(key)+1)%10)])

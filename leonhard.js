@@ -99,12 +99,23 @@
 	L.models.edges = [];
 	L.models.Edge = function (node1, node2)
 		{
+			// list of properties
+			this.n1;
+			this.n2;
+			this.directed;
+			
+			// initialize
 			this.init(node1, node2);
+			
+			// add to the list of edges
 			L.models.edges.push(this);
 		};
 	L.models.Edge.prototype.init = function (node1, node2)
 		{
-			this.setVertices(node1, node2)
+			
+			this.setVertices(node1, node2);
+			this.undirected();
+			
 			return this;
 		};
 	L.models.Edge.prototype.getVertices = function ()
@@ -128,6 +139,14 @@
 			this.n2 = arr[1];
 			return this;
 		};
+	L.models.Edge.prototype.directed = function ()
+		{
+			this.directed = true;
+		}
+	L.models.Edge.prototype.undirected = function ()
+		{
+			this.directed = false;
+		}
 	
 	// A quick and rough view, just as a sample. I think views should take a set of vertices and edges?
 	// Maybe I need a graph object...
@@ -149,142 +168,4 @@
 			return el;
 		}
 	
-	// A view using a force based algorithm and a canvas
-	// http://en.wikipedia.org/wiki/Force-based_algorithms_(graph_drawing)
-/*	L.views.FBA = function (vertices, edges)
-		{
-			var i,j,
-				locations = [],
-				velocities = [],
-				energy=1,
-				force = [],
-				direction = [],
-				// a quick R2 vector class
-				V = function(a1,a2){
-					if(this instanceof arguments.callee){
-						this.a1 = a1;
-						this.a2 = a2;
-						this.d = function (v) {
-							return Math.sqrt(((this.a1 - v.a1)*(this.a1 - v.a1))+((this.a2 - v.a2)*(this.a2 - v.a2)));
-						}
-						this.plus = function (v) {
-							return V(this.a1+v.a1,this.a2+v.a2);
-						}
-						this.minus = function (v) {
-							return V(this.a1-v.a1,this.a2-v.a2);
-						}
-						this.length = function (v) {
-							return Math.sqrt((this.a1*this.a1)+(this.a2*this.a2));
-						}
-						this.normal = function () {
-							return V(this.a1/this.length(),this.a2/this.length())
-						}
-						this.reverse = function () {
-							return V(0,0).minus(this);
-						}
-					}else{
-						return new V(a1,a2)
-					}
-				};
-				
-			// for each vertex
-			// set its position to two random numbers
-			// set its velocity to 0,0
-			for (i = 0; i < vertices.length; i++) {
-				velocities.push(V(0,0));
-				force.push(V(0,0));
-				direction.push([]);
-				locations.push(V(Math.random(), Math.random()));
-			}
-			
-			// loop
-			while (energy > .001) {
-				for (i = 0; i < vertices.length; i++) {
-					force[i] = V(0,0);
-					// for every other vector j not the same as i
-					for (j = 0; j < vertices.length; j++){ if(j!=i){
-						direction[i][j] = locations[i].minus(locations[j]).normal();
-						force[i]=force[i].plus(V(
-							(1-locations[i].d(locations[j]))*.001*direction[i][j].a1,
-							(1-locations[i].d(locations[j]))*.001*direction[i][j].a2
-						))
-					}}					
-				}
-				energy=0;
-			}
-		}
-*/
-		L.views.FBA = function (vertices, edges) {
-			var vreps=[],
-				ereps=[],
-				i, j, direction, loopcount = 0,
-				energy = 1,
-				// a quick R2 vector class
-				V = function(a1,a2){
-					if(this instanceof arguments.callee){
-						this.a1 = a1;
-						this.a2 = a2;
-						this.d = function (v) {
-							return Math.sqrt(((this.a1 - v.a1)*(this.a1 - v.a1))+((this.a2 - v.a2)*(this.a2 - v.a2)));
-						}
-						this.plus = function (v) {
-							return V(this.a1+v.a1,this.a2+v.a2);
-						}
-						this.minus = function (v) {
-							return V(this.a1-v.a1,this.a2-v.a2);
-						}
-						this.length = function (v) {
-							return Math.sqrt((this.a1*this.a1)+(this.a2*this.a2));
-						}
-						this.normal = function () {
-							return V(this.a1/this.length(),this.a2/this.length())
-						}
-						this.reverse = function () {
-							return V(0,0).minus(this);
-						}
-					}else{
-						return new V(a1,a2)
-					}
-				};;
-				
-			for (i = 0; i<vertices.length; i++) {
-				vreps.push({
-					vertex: vertices[i],
-					location: V(Math.random()/2,Math.random()/2),
-					velocity: V(0,0),
-					el: document.createElement('div')
-				});
-				vreps[i].el.innerHTML='&bull; '+vreps[i].vertex.name;
-				document.body.appendChild(vreps[i].el);
-			}
-			
-			while (energy > .5) {
-				loopcount++;
-				// position all of the elements
-				for (i = 0; i < vreps.length; i++) {
-					vreps[i].velocity = V(0,0)
-					for (j = 0; j < vreps.length; j++) {
-						if(i!=j){
-							direction = vreps[i].location.minus(vreps[j].location).normal();
-							vreps[i].velocity = vreps[i].velocity.plus(V(
-								(Math.abs(1-vreps[i].location.d(vreps[j].location)))*(.1/loopcount)*direction.a1,
-								(Math.abs(1-vreps[i].location.d(vreps[j].location)))*(.1/loopcount)*direction.a2
-							));
-						}
-					}
-					for (j = 0; j < vreps.length; j++) {
-						if( vreps[i].vertex.adjacent(vreps[j].vertex) ){
-							direction = vreps[i].location.minus(vreps[j].location).normal();
-							vreps[i].velocity = vreps[i].velocity.minus(V(
-								(Math.abs(1-vreps[i].location.d(vreps[j].location)))*(.1/loopcount)*direction.a1,
-								(Math.abs(1-vreps[i].location.d(vreps[j].location)))*(.1/loopcount)*direction.a2
-							));
-						}
-					}
-					vreps[i].location = vreps[i].location.plus(vreps[i].velocity);
-					vreps[i].el.setAttribute('style','position:absolute;font-size:10px;top:'+vreps[i].location.a1*window.innerHeight+'px;left:'+vreps[i].location.a2*window.innerWidth+'px;')
-				}
-				energy = energy - .00001;
-			}
-		}
 }());

@@ -4,14 +4,33 @@
 		L = leonhard;
 	
 	// Some shortcuts:
-	window.$Vertex = function (arg) { new L.models.Vertex(arg) };
+	window.$Vertex = function (arg, par) { new L.models.Vertex(arg, par) };
 	window.$Node = $Vertex;
-	window.$Edge = function (arg1, arg2) { new L.models.Edge(arg1, arg2) };
+	window.$Edge = function (arg1, arg2, par) { new L.models.Edge(arg1, arg2, par) };
 	window._;
 	
 	// setup some containers
 	L.models = {};
 	L.views = {};
+	
+	// The Graph Model!
+	L.models.graphs = []
+	
+	L.models.Graph = function ()
+		{
+			this.vertices = [];
+			this.edges = [];
+		};
+	L.models.Graph.prototype.vertex = function (arg)
+		{
+			arg.parent = this;
+			$Vertex(arg);
+		};
+	L.models.Graph.prototype.node = L.models.Graph.prototype.vertex;
+	L.models.Graph.prototype.edge = function(arg1, arg2)
+		{
+			$Edge(arg1, arg2, this);
+		};
 	
 	// The Vertex Model!
 	L.models.vertices = [];
@@ -26,13 +45,15 @@
 			this.init(opts);
 			
 			// add this node to our node list
-			L.models.vertices.push(this);
+			this.parent.vertices.push(this);
 		};
 	L.models.Vertex.prototype.init = function (opts)
 		{
+			opts = opts || {};
 			// for each option, if it's set use it, otherwise null
 			this.name = opts.name || null;
 			this.color = opts.color || null;
+			this.parent = opts.parent || L.models;
 		}
 	L.models.Vertex.prototype.connect = function (node)
 		{
@@ -97,7 +118,7 @@
 		
 	// The Edge Model!
 	L.models.edges = [];
-	L.models.Edge = function (node1, node2)
+	L.models.Edge = function (node1, node2, opts)
 		{
 			// list of properties
 			this.n1;
@@ -105,16 +126,19 @@
 			this.directed;
 			
 			// initialize
-			this.init(node1, node2);
+			this.init(node1, node2, opts);
 			
 			// add to the list of edges
-			L.models.edges.push(this);
+			this.parent.edges.push(this);
 		};
-	L.models.Edge.prototype.init = function (node1, node2)
+	L.models.Edge.prototype.init = function (node1, node2, opts)
 		{
 			
 			this.setVertices(node1, node2);
 			this.undirected();
+			
+			opts = opts || {};
+			this.parent = opts.parent || L.models;
 			
 			return this;
 		};

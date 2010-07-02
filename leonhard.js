@@ -58,7 +58,7 @@
 	L.models.Vertex.prototype.connect = function (node)
 		{
 			// create a new edge connected to this node and the argument
-			new L.models.Edge(this, node);
+			new L.models.Edge(this, node, {'parent': this.parent});
 		};
 	L.models.Vertex.prototype.getEdges = function ()
 		{
@@ -192,9 +192,12 @@
 			return el;
 		}
 		
-	L.views.SVG = function (vertices, edges)
+	L.views.SVG = function (graph)
 		{
-			var i,
+			graph = graph || L.models;
+			var vertices = graph.vertices,
+				edges = graph.edges,
+				i,
 				v = [],
 				e = [],
 				c = Raphael(0,0,600,600);

@@ -5,16 +5,16 @@
 		<script src="raphael.js" type="text/javascript"></script>
 		<script src="leonhard.js" type="text/javascript"></script>
 		<script type="text/javascript">
-			var i;
+			var i, g = new leonhard.models.Graph();
 			for (i = 0; i < 10; i++) {
-				new $Vertex({name: 'node'+i});
+				g.vertex({name: 'node'+i});
 			}
-			for (key in leonhard.models.vertices){
-				leonhard.models.vertices[key].connect(leonhard.models.vertices[((Math.floor(key)+1)%10)])
+			for (key in g.vertices){
+				g.vertices[key].connect(g.vertices[((Math.floor(key)+1)%10)])
 			}
 			
 			window.addEventListener('load',function () {
-				leonhard.views.SVG(leonhard.models.vertices, leonhard.models.edges);
+				leonhard.views.SVG(g);
 			}, false)
 		</script>
 	</head>

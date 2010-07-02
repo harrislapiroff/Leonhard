@@ -21,12 +21,12 @@
 			this.vertices = [];
 			this.edges = [];
 		};
-	L.models.Graph.prototype.vertex = function (arg)
+	L.models.Graph.prototype.vertex =
+	L.models.Graph.prototype.node = function (arg)
 		{
 			arg.parent = this;
 			$Vertex(arg);
 		};
-	L.models.Graph.prototype.node = L.models.Graph.prototype.vertex;
 	L.models.Graph.prototype.edge = function(arg1, arg2)
 		{
 			$Edge(arg1, arg2, this);
@@ -192,25 +192,40 @@
 			return el;
 		}
 		
-	L.views.SVG = function (graph)
+	L.views.SVG = function (graph, opts)
 		{
-			graph = graph || L.models;
-			var vertices = graph.vertices,
-				edges = graph.edges,
+			this.graph = graph || L.models;
+			this.opts = opts || {};
+			
+			this.init();
+		};
+	L.views.SVG.prototype.init = function ()
+		{
+			this.width = this.opts.width || 1200;
+			this.height = this.opts.height || 600;
+			this.c = Raphael(0, 0, this.width, this.height);
+			this.render();
+		};
+	L.views.SVG.prototype.render = function ()
+		{
+			var vertices = this.graph.vertices,
+				edges = this.graph.edges,
 				i,
 				v = [],
 				e = [],
-				c = Raphael(0,0,600,600);
+				c = this.c;
 				
+			this.c.clear();
+			
 			for ( key in vertices ) {
 				i = v.push(vertices[key]);
 				vertices[key].view =
 					{
-						'cx':Math.random()*600,
-						'cy':Math.random()*600,
-						'el': c.circle().attr({'fill':'#F00','stroke':'none'})
-					}
-				vertices[key].view.el.attr({'cx': vertices[key].view.cx, 'cy': vertices[key].view.cy, 'r':'3'})
+						'cx':Math.random(),
+						'cy':Math.random(),
+						'el': c.circle().attr({'fill':'#067','stroke':'#999'})
+					};
+				vertices[key].view.el.attr({'cx': vertices[key].view.cx * this.width, 'cy': vertices[key].view.cy * this.height, 'r':'3', 'style': 'z-index:999'})
 			}
 			for ( key in edges ) {
 				var verts = edges[key].getVertices(),
@@ -218,10 +233,9 @@
 					end = [verts[1].view.cx, verts[1].view.cy];
 				edges[key].view =
 					{
-						'el': c.path('M'+start[0]+' '+start[1]+'L'+end[0]+' '+end[1])
-					}
+						'el': c.path('M' + (start[0] * this.width) + ' ' + (start[1] * this.height) + 'L' + (end[0] * this.width) + ' ' + (end[1] * this.height)).attr({'stroke':'#999'})
+					};
 			}
-			
-		}
+		};
 	
 }());

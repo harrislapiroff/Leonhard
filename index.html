@@ -12,9 +12,12 @@
 			for (key in g.vertices){
 				g.vertices[key].connect(g.vertices[((Math.floor(key)+1)%10)])
 			}
+			for (i = 0; i < 10; i++){
+				g.vertices[i].connect(g.vertices[(i+2)%10]);
+			}
 			
 			window.addEventListener('load',function () {
-				new leonhard.views.SVG(g);
+				new leonhard.views.SVG(g, {'width': window.innerWidth, 'height':window.innerHeight});
 			}, false)
 		</script>
 	</head>

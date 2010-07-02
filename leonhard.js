@@ -172,26 +172,7 @@
 			this.directed = false;
 		}
 	
-	// A quick and rough view, just as a sample. I think views should take a set of vertices and edges?
-	// Maybe I need a graph object...
-	L.views.Bullets = function (vertices, edges)
-		{
-			var i,
-				el;
-			
-			el = document.createElement('div');
-		
-			for (i = 0; i < vertices.length; i++){
-				el.innerHTML = el.innerHTML + '<div class="node" id="'+vertices[i].name+'">&bull;</div>';
-			}
-			for (i = 0; i < edges.length; i++){
-				el.innerHTML = el.innerHTML + '<div class="edge" id="'+edges[i].n1.name+'_'+edges[i].n2.name+'">|</div>';
-			}
-		
-			document.body.appendChild(el);
-			return el;
-		}
-		
+	// A view that renders using SVG
 	L.views.SVG = function (graph, opts)
 		{
 			this.graph = graph || L.models;
@@ -225,7 +206,7 @@
 						'cy':Math.random(),
 						'el': c.circle().attr({'fill':'#067','stroke':'#999'})
 					};
-				vertices[key].view.el.attr({'cx': vertices[key].view.cx * this.width, 'cy': vertices[key].view.cy * this.height, 'r':'3', 'style': 'z-index:999'})
+				vertices[key].view.el.attr({'cx': vertices[key].view.cx * this.width, 'cy': vertices[key].view.cy * this.height, 'r':'5', 'style': 'z-index:999'})
 			}
 			for ( key in edges ) {
 				var verts = edges[key].getVertices(),

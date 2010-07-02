@@ -206,7 +206,7 @@
 						'cy':Math.random(),
 						'el': c.circle().attr({'fill':'#067','stroke':'#999'})
 					};
-				vertices[key].view.el.attr({'cx': vertices[key].view.cx * this.width, 'cy': vertices[key].view.cy * this.height, 'r':'5', 'style': 'z-index:999'})
+				vertices[key].view.el.attr({'cx': vertices[key].view.cx * this.width, 'cy': vertices[key].view.cy * this.height, 'r':'5', 'style': 'z-index:999'});
 			}
 			for ( key in edges ) {
 				var verts = edges[key].getVertices(),
